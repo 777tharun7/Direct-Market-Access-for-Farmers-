@@ -1,63 +1,88 @@
+<div align="center">
+
 # Direct Market Access for Farmers
 
-A machine-learning project exploring farmer-to-vendor matching using farmer and vendor attributes. The goal is to surface relevant potential trading partners and reduce reliance on informal discovery.
+**Farmer–vendor discovery prototype using data preparation, clustering, and rule-based matching**
+
+[![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![scikit--learn](https://img.shields.io/badge/scikit--learn-F7931E?style=flat-square&logo=scikitlearn&logoColor=white)](https://scikit-learn.org/)
+
+</div>
+
+## Overview
+
+This project explores how structured farmer and vendor data can support discovery of potential trading partners. A Streamlit interface accepts a location and product, then offers vendor or farmer candidates based on the implemented matching logic.
 
 ## Problem
-Farmers may have difficulty finding vendors whose product requirements, location, pricing, and reliability expectations align with their needs. This project explores data-driven matching to help rank candidate partners.
 
-## Features described by the project
-- Bidirectional candidate recommendations for farmers and vendors.
-- Data preparation, including handling missing values, duplicates, and categorical features.
-- K-Means clustering to group records using selected attributes.
-- Matching attributes including product compatibility, location, vendor reliability, and price-related features.
-- Sample output to illustrate the intended user experience.
+Farmers and vendors may struggle to identify suitable trading partners across product and location constraints. The prototype demonstrates a data-driven workflow for narrowing possible matches; it has not yet established recommendation quality or real-world economic impact through a documented evaluation.
 
-## Dataset
-The previous project documentation describes:
-- farmers_dataset.csv — 4,265 farmer records.
-- vendors_extended.csv — 4,825 vendor records.
+## Current implementation
 
-Confirm these counts against the actual files before each release. Document the source, licence, data-generation method, and whether records are synthetic or real. Do not publish private personal data.
+- Loads farmer and vendor records from CSV files.
+- Removes duplicate name/product records and drops rows missing location or product.
+- Encodes product and location categories with scikit-learn `LabelEncoder`.
+- Fits separate K-Means models for farmer and vendor feature sets.
+- For vendor results, filters candidates by exact encoded location and product, then sorts by reliability score and price.
+- For farmer results, uses the farmer cluster together with exact product/location filters.
+- Displays up to five candidate rows in Streamlit.
 
-## Methodology
-1. Inspect schemas, duplicates, missing values, and category distributions.
-2. Clean records using documented rules.
-3. Encode categorical variables and scale numeric variables where appropriate.
-4. Cluster farmer and vendor records using the implemented K-Means configuration.
-5. Generate candidate matches using product compatibility and relevant location, price, and reliability constraints.
-6. Return candidate lists to the user.
+## Architecture
 
-**Evaluation note:** Clustering alone does not prove recommendation quality. Evaluate the final matching logic separately.
+```text
+Farmer/vendor CSV files
+        ↓
+Data cleaning and category encoding
+        ↓
+Feature preparation ──→ K-Means clustering
+        ↓
+Location + product filtering
+        ↓
+Ranked vendor candidates / farmer candidates
+        ↓
+Streamlit results UI
+```
 
-## Evaluation plan
-Do not claim improved matching quality until measured. Recommended checks:
-- Compare with a simple product-and-location baseline.
-- Measure Precision@K / Recall@K if labelled relevant matches exist.
-- Measure the percentage of recommendations satisfying product and location constraints.
-- Measure the percentage of farmers and vendors receiving at least one valid candidate.
-- Use NDCG@K or another ranking metric if relevance labels are available.
+## Tech stack
 
-| Evaluation item | Result |
-|---|---|
-| Baseline definition | Add implemented baseline |
-| Test set / validation method | Add actual method |
-| Precision@K / Recall@K | Add measured result or mark unavailable |
-| Valid-match rate | Add measured result |
-| Coverage | Add measured result |
+- **Language:** Python
+- **UI:** Streamlit
+- **Data handling:** pandas, NumPy
+- **Machine learning:** scikit-learn (`LabelEncoder`, `StandardScaler`, `KMeans`)
 
-## Technology
-The existing documentation lists Python, Pandas, NumPy, Matplotlib, and scikit-learn components including LabelEncoder, StandardScaler, and KMeans. Confirm these against the current code and dependency files.
+## Run locally
 
-## Reproduction
-Add the actual Python version, dependency installation command, dataset placement, and commands/notebooks to run cleaning, clustering, matching, and evaluation.
+The two input datasets are **not present in the current repository root**, while `app.py` expects both filenames below. Obtain or generate data you are permitted to use and place the files next to `app.py` before launching the app.
 
-## Limitations and future work
-Clusters do not guarantee the best trading partner. Synthetic examples do not establish real-world economic impact. Distance, transport cost, seasonal availability, and changing market prices may improve matching if reliable data is available. Protect farmer and vendor data and explain how recommendations are generated.
+- `farmers_dataset.csv`
+- `vendors_extended.csv`
 
-## Contributors
-- D. Tharun
-- CH. Harsha Luke
-- K. Navadeep
+Install dependencies and launch:
 
-## Source
-[View repository](https://github.com/777tharun7/Direct-Market-Access-for-Farmers-)
+```bash
+python -m venv .venv
+# Activate the environment:
+# macOS/Linux: source .venv/bin/activate
+# Windows PowerShell: .venv\Scripts\Activate.ps1
+
+python -m pip install streamlit pandas numpy scikit-learn
+streamlit run app.py
+```
+
+Dataset schemas should include the columns accessed by the code. Farmer records include fields such as `farmer_id`, `name`, `location`, and `product`. Vendor records additionally require `vendor_id`, `reliability_score`, and `avg_price_quintal`.
+
+## Evaluation and limitations
+
+No measured recommendation-quality metrics are currently documented. Before making quality claims, compare the results with a simple product/location baseline and evaluate against labelled relevant matches where available. Useful measures include Precision@K, Recall@K, NDCG@K, candidate coverage, and the share of returned matches that satisfy hard constraints.
+
+The current approach uses integer-encoded categories as K-Means features. Such codes imply an artificial numeric order between categories, so cluster distances should be interpreted cautiously. Clustering alone does not validate the quality of the final recommendations.
+
+## Data and privacy
+
+Document the data source, licence, generation method, and whether records are synthetic or real. Use only data you have permission to publish, remove personal contact details, and do not commit private farmer/vendor information.
+
+## Repository
+
+- [Application code](app.py)
+- [Exploratory notebook](Untitled7.ipynb)
