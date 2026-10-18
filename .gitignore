@@ -1,0 +1,18 @@
+# Python environments
+.venv/
+venv/
+env/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Local/private project datasets: supply permitted files locally
+farmers_dataset.csv
+vendors_extended.csv
+
+# Local environment and editor files
+.env
+.DS_Store
+.vscode/
